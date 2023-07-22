@@ -17,4 +17,16 @@ class TaskTest < Test::Unit::TestCase
         assert_true(t.soon.empty?)
         assert_true(t.later.empty?)
     end
+
+    # Setting TaskContainer #now when empty
+    # should not change any other properties.
+    def test_now_when_empty
+        t = TaskContainer.new
+        t.now = "a task i need to do now"
+
+        assert_equal("a task i need to do now", t.now)
+        assert_nil(t.next)
+        assert_true(t.soon.empty?)
+        assert_true(t.later.empty?)
+    end
 end
