@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 require 'yaml'
 
 # Container for tasks.
@@ -106,10 +108,12 @@ if $0 == __FILE__
     elsif COMMAND == "status"
         puts "now:   #{tasks.now}"
         puts "next:  #{tasks.next}"
+        puts ""
+
         puts "soon:"
-        tasks.soon.each { |t| puts "    #{t}" }
+        tasks.soon.each  { |t| puts "       #{t}" }
         puts "later:"
-        tasks.later.each { |t| puts "    #{t}" }
+        tasks.later.each { |t| puts "       #{t}" }
     end
 
     # Save current tasks back to YAML file.
