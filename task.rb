@@ -16,10 +16,25 @@ class TaskContainer
     def now=(s)
         if @now.nil?
             @now = s
+        else
+            self.next = @now
+            @now = s
         end
     end
 
+    # The task that needs to be done next (after "now")
+    #
+    # Only one task can be "next" - because time is linear.
+    # Setting "next" when another task is already "next" makes the existing task "soon"
     def next; @next; end
+    def next=(s)
+        if @next.nil?
+            @next = s
+        else
+            @soon.unshift(@next)
+            @next = s
+        end
+    end
 
     def soon; @soon; end
     def later; @later; end
