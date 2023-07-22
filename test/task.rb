@@ -86,4 +86,33 @@ class TaskTest < Test::Unit::TestCase
         assert_equal("needs doing next", t.soon[0])
         assert_equal("needs doing soon", t.soon[1])
     end
+
+    # Tests that tasks can be loaded from hash.
+    def test_from_hash
+        h = {
+            now: "current task",
+            next: "next task",
+            soon: [
+                "one task",
+                "two task"
+            ],
+            later: [
+                "three task",
+                "four task"
+            ]
+        }
+
+        t = TaskContainer::from_h(h)
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        
+        assert_equal(2, t.soon.size)
+        assert_equal("one task", t.soon[0])
+        assert_equal("two task", t.soon[1])
+
+        assert_equal(2, t.later.size)
+        assert_equal("three task", t.later[0])
+        assert_equal("four task", t.later[1])
+    end
 end
