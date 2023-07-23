@@ -22,15 +22,28 @@ class ArrayView
     # Returns true if the held slice of the underlying array is empty,
     # false otherwise.
     def empty?
-        @array.size <= @start_index
+        held_slice.empty?
     end
 
     # Returns size of the held slice of the underlying array.
     def size
-        size = @array.size - @start_index
-        size = 0 if size < 0
-        size
+        held_slice.size
     end
+
+    # Executes block for each element of held slice.
+    def each(&block)
+        held_slice.each(&block)
+    end
+
+    # Read-only view of underlying array
+    def held_slice
+        if @array.size < @start_index
+            []
+        else
+            @array[@start_index..-1]
+        end
+    end
+    private :held_slice
 end
 
 # Container for tasks.
@@ -90,7 +103,13 @@ class TaskContainer
     def next; @high_prio[1]; end
     def next=(s)
         raise "Invalid task: '#{s.inspect}'" unless s.is_a? String
-        @high_prio.insert(1, s)
+
+        # Insert task into second place in array, or first if array is empty.
+        if @high_prio.empty?
+            @high_prio << s
+        else
+            @high_prio.insert(1, s)
+        end
     end
 
     def soon; @soon; end

@@ -59,10 +59,11 @@ class TaskTest < Test::Unit::TestCase
     # into #soon
     def test_next_when_not_empty
         t = TaskContainer.new
+        t.now = "current task"
         t.next = "next task"
         t.next = "oops need to do something else first"
 
-        assert_nil(t.now)
+        assert_equal("current task", t.now)
         assert_equal("oops need to do something else first", t.next)
         
         assert_equal(1, t.soon.size)
@@ -86,6 +87,15 @@ class TaskTest < Test::Unit::TestCase
         assert_equal(2, t.soon.size)
         assert_equal("needs doing next", t.soon[0])
         assert_equal("needs doing soon", t.soon[1])
+    end
+
+    # Setting #next when #now is empty should make #now the value of #next.
+    def test_next_when_now_empty
+        t = TaskContainer.new
+        t.next = "current task"
+
+        assert_equal("current task", t.now)
+        assert_nil(t.next)
     end
 
     # Tests that tasks can be loaded from hash.
