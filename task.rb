@@ -207,7 +207,8 @@ if $0 == __FILE__
     end
 
     COMMAND = ARGV[0]
-    TASKFILE = "tasks.yaml"
+    TASKDIR = ENV["TASKDIR"] || abort("TASKDIR is not set")
+    TASKFILE = File.join(TASKDIR, "tasks.yaml")
 
     # Load current tasks from YAML file if it exists.
     tasks = if File.exist?(TASKFILE)
@@ -248,7 +249,7 @@ if $0 == __FILE__
     else
         puts "unknown command '#{COMMAND}'"
         puts ""
-        
+
         usage()
         exit 1
     end
