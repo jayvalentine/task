@@ -57,7 +57,7 @@ class TaskTest < Test::Unit::TestCase
 
     # Setting #next when not empty should push the existing task
     # into #soon
-    def test_next_when_empty
+    def test_next_when_not_empty
         t = TaskContainer.new
         t.next = "next task"
         t.next = "oops need to do something else first"
@@ -75,11 +75,12 @@ class TaskTest < Test::Unit::TestCase
     # into #soon. Here we make sure that task is the first one in #soon
     def test_next_when_not_empty_first_soon
         t = TaskContainer.new
+        t.now = "current task"
         t.soon << "needs doing soon"
         t.next = "needs doing next"
         t.next = "oops need to do something else first"
 
-        assert_nil(t.now)
+        assert_equal("current task", t.now)
         assert_equal("oops need to do something else first", t.next)
 
         assert_equal(2, t.soon.size)

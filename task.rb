@@ -2,13 +2,48 @@
 
 require 'yaml'
 
+# Provides a view over a slice of an array.
+class ArrayView
+    def initialize(array, start_index)
+        @array = array
+        @start_index = start_index
+    end
+
+    # Appends an element to the end of the underlying array.
+    def <<(value)
+        @array << value
+    end
+
+    # Indexes into the underlying array.
+    def [](index)
+        @array[@start_index + index]
+    end
+
+    # Returns true if the held slice of the underlying array is empty,
+    # false otherwise.
+    def empty?
+        @array.size <= @start_index
+    end
+
+    # Returns size of the held slice of the underlying array.
+    def size
+        size = @array.size - @start_index
+        size = 0 if size < 0
+        size
+    end
+end
+
 # Container for tasks.
 class TaskContainer
     def initialize()
-        @now = nil
-        @next = nil
-        @soon = []
-        @later = []
+        @high_prio = []
+        @low_prio = []
+        
+        # Any high-prio task that is not "now" or "next"
+        # is "soon".
+        @soon = ArrayView.new(@high_prio, 2)
+
+        @later = ArrayView.new(@low_prio, 0)
     end
 
     def self.from_h(h)
@@ -23,10 +58,16 @@ class TaskContainer
 
     def to_h
         h = {}
-        h[:now] = @now unless @now.nil?
-        h[:next] = @next unless @next.nil?
-        h[:soon] = @soon
-        h[:later] = @later
+        h[:now] = @high_prio[0] unless @high_prio.size < 1
+        h[:next] = @high_prio[1] unless @high_prio.size < 2
+        
+        h[:soon] = if @high_prio.size < 3
+            []
+        else
+            @high_prio[2..-1]
+        end
+
+        h[:later] = @low_prio
         
         h
     end
@@ -36,28 +77,20 @@ class TaskContainer
     #
     # Only one task can be "now" - because you can only do one thing at once.
     # Setting "now" when another task is already "now" makes the existing task "next"
-    def now; @now; end
+    def now; @high_prio[0]; end
     def now=(s)
-        if @now.nil?
-            @now = s
-        else
-            self.next = @now
-            @now = s
-        end
+        raise "Invalid task: '#{s.inspect}'" unless s.is_a? String
+        @high_prio.unshift(s)
     end
 
     # The task that needs to be done next (after "now")
     #
     # Only one task can be "next" - because time is linear.
     # Setting "next" when another task is already "next" makes the existing task "soon"
-    def next; @next; end
+    def next; @high_prio[1]; end
     def next=(s)
-        if @next.nil?
-            @next = s
-        else
-            @soon.unshift(@next)
-            @next = s
-        end
+        raise "Invalid task: '#{s.inspect}'" unless s.is_a? String
+        @high_prio.insert(1, s)
     end
 
     def soon; @soon; end
