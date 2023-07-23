@@ -14,7 +14,7 @@ A simple task-tracking app for busy programmers.
 
 `task` provides these four keywords to allow you to add new tasks. For example, the following command adds a new task `next`:
 
-```cmd
+```
 task next write a ticket for that bug
 ```
 
@@ -29,7 +29,7 @@ In addition to the four commands listed above, `task` provides the following com
 `done` marks a task as done. This is done by keyword-matching against the task-list. For example, the following command would mark
 the task described above as done:
 
-```cmd
+```
 task done bug ticket
 ```
 
