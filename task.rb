@@ -114,6 +114,54 @@ class TaskContainer
 
     def soon; @soon; end
     def later; @later; end
+
+    DoneResult = Struct.new("DoneResult", :result, :tasks)
+
+    # Marks the task with the given keywords as done.
+    # Returns a struct with following attributes:
+    #
+    #     result => true if a task was marked as done, false otherwise
+    #     tasks  => array of tasks matching passed keywords
+    def done(keyword_string)
+        matching_index_high_prio = []
+        matching_index_low_prio = []
+
+        @high_prio.each_with_index do |s, i|
+            if keyword_match(s, keyword_string)
+                matching_index_high_prio << i
+            end
+        end
+
+        @low_prio.each_with_index do |s, i|
+            if keyword_match(s, keyword_string)
+                matching_index_low_prio << i
+            end
+        end
+
+        # Result is true if exactly one task matched the keywords.
+        result = (matching_index_high_prio.size + matching_index_low_prio.size) == 1
+
+        tasks =  matching_index_high_prio.map { |i| @high_prio[i] }
+        tasks += matching_index_low_prio.map  { |i| @low_prio[i] }
+
+        # Only mark tasks as done if result is true.
+        if result
+            if matching_index_high_prio.size == 1
+                @high_prio.delete_at(matching_index_high_prio.first)
+            elsif matching_index_low_prio.size == 1
+                @low_prio.delete_at(matching_index_low_prio.first)
+            end
+        end
+
+        DoneResult.new(result, tasks)
+    end
+
+    # Returns true if the given string matches the keyword string,
+    # and false otherwise.
+    def keyword_match(s, keyword_string)
+        s = s.split
+        keyword_string.split.all? { |kw| s.include?(kw) }
+    end
 end
 
 def get_task

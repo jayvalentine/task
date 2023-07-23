@@ -126,4 +126,72 @@ class TaskTest < Test::Unit::TestCase
         assert_equal("three task", t.later[0])
         assert_equal("four task", t.later[1])
     end
+
+    # Tests that the 'now' task can be marked as done.
+    def test_now_done
+        t = TaskContainer.new
+        t.now = "current task"
+
+        assert_equal("current task", t.now)
+
+        done = t.done("current task")
+        assert_true(done.result)
+        assert_equal(1, done.tasks.size)
+        assert_equal("current task", done.tasks[0])
+
+        assert_nil(t.now)
+    end
+
+    # Tests that tasks can be marked as 'done' by keyword.
+    def test_now_done_keywords
+        t = TaskContainer.new
+        t.now = "a really complicated task"
+
+        assert_equal("a really complicated task", t.now)
+
+        done = t.done("task complicated")
+        assert_true(done.result)
+        assert_equal(1, done.tasks.size)
+        assert_equal("a really complicated task", done.tasks[0])
+
+        assert_nil(t.now)
+    end
+
+    # Tests that later tasks can be marked as done.
+    def test_later_done
+        t = TaskContainer.new
+        t.now = "current task"
+        t.later << "do something later"
+
+        assert_equal("current task", t.now)
+        assert_equal(1, t.later.size)
+        assert_equal("do something later", t.later[0])
+
+        done = t.done("later")
+        assert_true(done.result)
+        assert_equal(1, done.tasks.size)
+        assert_equal("do something later", done.tasks[0])
+
+        assert_equal("current task", t.now)
+        assert_equal(0, t.later.size)
+    end
+
+    # Tests that tasks can be marked as 'done' by keyword.
+    def test_later_done_keywords
+        t = TaskContainer.new
+        t.now = "current task"
+        t.later << "do something later for that person"
+
+        assert_equal("current task", t.now)
+        assert_equal(1, t.later.size)
+        assert_equal("do something later for that person", t.later[0])
+
+        done = t.done("do something for person")
+        assert_true(done.result)
+        assert_equal(1, done.tasks.size)
+        assert_equal("do something later for that person", done.tasks[0])
+
+        assert_equal("current task", t.now)
+        assert_equal(0, t.later.size)
+    end
 end
