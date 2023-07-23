@@ -246,6 +246,9 @@ if $0 == __FILE__
         end
         puts ""
     else
+        puts "unknown command '#{COMMAND}'"
+        puts ""
+        
         usage()
         exit 1
     end
