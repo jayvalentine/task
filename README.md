@@ -1,6 +1,6 @@
 # task
 
-A simple task-tracking app for busy programmers.
+A simple command-line task-tracking app for busy programmers.
 
 ## How task works
 
