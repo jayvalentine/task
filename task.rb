@@ -231,6 +231,20 @@ if $0 == __FILE__
     elsif COMMAND == "status"
         # status displayed below so this command doesn't do anything in particular.
         # it's in the list here so that the tool doesn't error.
+    elsif COMMAND == "done"
+        kw = get_task()
+        result = tasks.done(kw)
+        if result.result
+            puts "task '#{result.tasks.first}' done"
+        elsif result.tasks.empty?
+            puts "no task matching keywords '#{kw}'"
+        else
+            puts "multiple tasks matching '#{kw}':"
+            result.tasks.each do |t|
+                puts "    #{t}"
+            end
+        end
+        puts ""
     else
         usage()
         exit 1
