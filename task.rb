@@ -120,21 +120,41 @@ def get_task
     ARGV[1..-1].join(" ")
 end
 
+def usage
+    puts "usage: task <command> [<task>]"
+    puts ""
+    puts "commands for adding a new task:"
+    puts "    now:    add a new task to do right now"
+    puts "    next:   add a new task to do next"
+    puts "    soon:   add a new task to do soon"
+    puts "    later:  add a new task to do later"
+    puts ""
+    puts "for interacting with existing tasks:"
+    puts "    status: display current tasks"
+    puts "    done:   mark task as done"
+    puts ""
+    puts "other commands:"
+    puts "    help:   display this text"
+    puts ""
+end
+
+def status(tasks)
+    puts "now:   #{tasks.now}"
+    puts "next:  #{tasks.next}"
+    puts ""
+
+    puts "soon:"
+    tasks.soon.each  { |t| puts "       #{t}" }
+    puts "later:"
+    tasks.later.each { |t| puts "       #{t}" }
+
+    puts ""
+end
+
 if $0 == __FILE__
     # Should have at least one argument.
     if ARGV.size < 1
-        puts "usage: task <command> [<task>]"
-        puts ""
-        puts "commands for adding a new task:"
-        puts "    now:    add a new task to do right now"
-        puts "    next:   add a new task to do next"
-        puts "    soon:   add a new task to do soon"
-        puts "    later:  add a new task to do later"
-        puts ""
-        puts "for interacting with existing tasks:"
-        puts "    status: display current tasks"
-        puts "    done:   mark task as done"
-
+        usage()
         exit 1
     end
 
@@ -149,7 +169,10 @@ if $0 == __FILE__
     end
 
     # Perform the user's command.
-    if COMMAND == "now"
+    if COMMAND == "help"
+        usage()
+        exit 0
+    elsif COMMAND == "now"
         tasks.now = get_task()
     elsif COMMAND == "next"
         tasks.next = get_task()
@@ -158,15 +181,14 @@ if $0 == __FILE__
     elsif COMMAND == "later"
         tasks.later << get_task()
     elsif COMMAND == "status"
-        puts "now:   #{tasks.now}"
-        puts "next:  #{tasks.next}"
-        puts ""
-
-        puts "soon:"
-        tasks.soon.each  { |t| puts "       #{t}" }
-        puts "later:"
-        tasks.later.each { |t| puts "       #{t}" }
+        # status displayed below so this command doesn't do anything in particular.
+        # it's in the list here so that the tool doesn't error.
+    else
+        usage()
+        exit 1
     end
+
+    status(tasks)
 
     # Save current tasks back to YAML file.
     File.write(TASKFILE, YAML::dump(tasks.to_h))
