@@ -211,6 +211,7 @@ def usage
     puts "for interacting with existing tasks:"
     puts "    status: display current tasks"
     puts "    done:   mark task as done"
+    puts "    bump:   mark task as highest priority"
     puts ""
     puts "other commands:"
     puts "    help:   display this text"
@@ -294,6 +295,20 @@ if $0 == __FILE__
         result = tasks.done(kw)
         if result.result
             puts "task '#{result.tasks.first}' done"
+        elsif result.tasks.empty?
+            puts "no task matching keywords '#{kw}'"
+        else
+            puts "multiple tasks matching '#{kw}':"
+            result.tasks.each do |t|
+                puts "    #{t}"
+            end
+        end
+        puts ""
+    elsif COMMAND == "bump"
+        kw = get_task()
+        result = tasks.bump(kw)
+        if result.result
+            puts "task '#{result.tasks.first}' bumped"
         elsif result.tasks.empty?
             puts "no task matching keywords '#{kw}'"
         else
