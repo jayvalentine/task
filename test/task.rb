@@ -209,4 +209,65 @@ class TaskTest < Test::Unit::TestCase
         assert_equal("current task", t.now)
         assert_equal(0, t.later.size)
     end
+
+    # Tests that 'bump' can bump a task from 'soon' to 'now'.
+    def test_bump
+        t = TaskContainer.new
+        t.now = "current task"
+        t.next = "next task"
+        t.soon << "some other task"
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        assert_equal("some other task", t.soon[0])
+
+        result = t.bump("some other task")
+        assert_true(result.result)
+        assert_equal(1, result.tasks.size)
+        assert_equal("some other task", result.tasks[0])
+
+        assert_equal("some other task", t.now)
+        assert_equal("current task", t.next)
+        assert_equal("next task", t.soon[0])
+    end
+
+    # Tests that 'bump' returns non-success when task not found.
+    def test_bump_none
+        t = TaskContainer.new
+        t.now = "current task"
+        t.next = "next task"
+        t.soon << "some other task"
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        assert_equal("some other task", t.soon[0])
+
+        result = t.bump("doesnt exist")
+        assert_false(result.result)
+        assert_equal(0, result.tasks.size)
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        assert_equal("some other task", t.soon[0])
+    end
+
+    # Tests that 'bump' returns non-success when task name is ambiguous.
+    def test_bump_ambiguous
+        t = TaskContainer.new
+        t.now = "current task"
+        t.next = "next task"
+        t.soon << "some other task"
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        assert_equal("some other task", t.soon[0])
+
+        result = t.bump("task")
+        assert_false(result.result)
+        assert_equal(3, result.tasks.size)
+
+        assert_equal("current task", t.now)
+        assert_equal("next task", t.next)
+        assert_equal("some other task", t.soon[0])
+    end
 end

@@ -115,28 +115,12 @@ class TaskContainer
     def soon; @soon; end
     def later; @later; end
 
-    DoneResult = Struct.new("DoneResult", :result, :tasks)
+    FindResult = Struct.new("FindResult", :result, :tasks)
 
     # Marks the task with the given keywords as done.
-    # Returns a struct with following attributes:
-    #
-    #     result => true if a task was marked as done, false otherwise
-    #     tasks  => array of tasks matching passed keywords
+    # Returns a FindResult indicating the result of the operation.
     def done(keyword_string)
-        matching_index_high_prio = []
-        matching_index_low_prio = []
-
-        @high_prio.each_with_index do |s, i|
-            if keyword_match(s, keyword_string)
-                matching_index_high_prio << i
-            end
-        end
-
-        @low_prio.each_with_index do |s, i|
-            if keyword_match(s, keyword_string)
-                matching_index_low_prio << i
-            end
-        end
+        matching_index_high_prio, matching_index_low_prio = find_tasks(keyword_string)
 
         # Result is true if exactly one task matched the keywords.
         result = (matching_index_high_prio.size + matching_index_low_prio.size) == 1
@@ -153,8 +137,54 @@ class TaskContainer
             end
         end
 
-        DoneResult.new(result, tasks)
+        FindResult.new(result, tasks)
     end
+
+    # Bumps the task with the given keywords to 'now'.
+    # Returns a FindResult indicating the result of the operation.
+    def bump(keyword_string)
+        matching_index_high_prio, matching_index_low_prio = find_tasks(keyword_string)
+
+        # Result is true if exactly one task matched the keywords.
+        result = (matching_index_high_prio.size + matching_index_low_prio.size) == 1
+
+        tasks =  matching_index_high_prio.map { |i| @high_prio[i] }
+        tasks += matching_index_low_prio.map  { |i| @low_prio[i] }
+
+        # Only bump if result was successful.
+        if result
+            t = if matching_index_high_prio.size == 1
+                @high_prio.delete_at(matching_index_high_prio.first)
+            elsif matching_index_low_prio.size == 1
+                @low_prio.delete_at(matching_index_low_prio.first)
+            end
+
+            self.now = t
+        end
+
+        FindResult.new(result, tasks)
+    end
+
+    # Finds tasks that match given keyword string.
+    def find_tasks(keyword_string)
+        matching_index_high_prio = []
+        matching_index_low_prio = []
+
+        @high_prio.each_with_index do |s, i|
+            if keyword_match(s, keyword_string)
+                matching_index_high_prio << i
+            end
+        end
+
+        @low_prio.each_with_index do |s, i|
+            if keyword_match(s, keyword_string)
+                matching_index_low_prio << i
+            end
+        end
+
+        [matching_index_high_prio, matching_index_low_prio]
+    end
+    private :find_tasks
 
     # Returns true if the given string matches the keyword string,
     # and false otherwise.
@@ -162,6 +192,7 @@ class TaskContainer
         s = s.split
         keyword_string.split.all? { |kw| s.include?(kw) }
     end
+    private :keyword_match
 end
 
 def get_task
@@ -209,10 +240,14 @@ def status(tasks)
     lines << ["next:  - #{tasks.next}", COLORS[1]]
 
     lines << ["soon:  - #{tasks.soon[0]}", COLORS[2]]
-    lines += tasks.soon[1..-1].map  { |t| ["       - #{t}", COLORS[2]] }
+    unless tasks.soon.empty?
+        lines += tasks.soon[1..-1].map  { |t| ["       - #{t}", COLORS[2]] }
+    end
 
     lines << ["later: - #{tasks.later[0]}", COLORS[3]]
-    lines += tasks.later[1..-1].map { |t| ["       - #{t}", COLORS[3]] }
+    unless tasks.later.empty?
+        lines += tasks.later[1..-1].map { |t| ["       - #{t}", COLORS[3]] }
+    end
 
     lines.each do |s, code|
         puts color(pad(s, 60), code)
