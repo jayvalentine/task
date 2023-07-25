@@ -16,7 +16,7 @@ class ArrayView
 
     # Indexes into the underlying array.
     def [](index)
-        @array[@start_index + index]
+        held_slice()[index]
     end
 
     # Returns true if the held slice of the underlying array is empty,
@@ -186,15 +186,37 @@ def usage
     puts ""
 end
 
-def status(tasks)
-    puts "now:   #{tasks.now}"
-    puts "next:  #{tasks.next}"
-    puts ""
+COLORS = [
+    167, # now
+    131, # next
+    95,  # soon
+    59   # later
+]
 
-    puts "soon:"
-    tasks.soon.each  { |t| puts "       #{t}" }
-    puts "later:"
-    tasks.later.each { |t| puts "       #{t}" }
+def color(s, code)
+    "\033[48;5;#{code}m\033[38;5;252m#{s}\033[0m"
+end
+
+def pad(s, width)
+    padding = width - s.size
+    s += (" " * padding) if padding > 0
+    s
+end
+
+def status(tasks)
+    lines = []
+    lines << ["now:   - #{tasks.now}", COLORS[0]]
+    lines << ["next:  - #{tasks.next}", COLORS[1]]
+
+    lines << ["soon:  - #{tasks.soon[0]}", COLORS[2]]
+    lines += tasks.soon[1..-1].map  { |t| ["       - #{t}", COLORS[2]] }
+
+    lines << ["later: - #{tasks.later[0]}", COLORS[3]]
+    lines += tasks.later[1..-1].map { |t| ["      - #{t}", COLORS[3]] }
+
+    lines.each do |s, code|
+        puts color(pad(s, 60), code)
+    end
 
     puts ""
 end

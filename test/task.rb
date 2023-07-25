@@ -89,6 +89,21 @@ class TaskTest < Test::Unit::TestCase
         assert_equal("needs doing soon", t.soon[1])
     end
 
+    # It should be possible to index #soon by range.
+    def test_soon_index_range
+        t = TaskContainer.new
+        t.now = "first task"
+        t.next = "second task"
+
+        t.soon << "third task"
+        t.soon << "fourth task"
+        t.soon << "fifth task"
+
+        assert_equal(2, t.soon[1..-1].size)
+        assert_equal("fourth task", t.soon[1..-1][0])
+        assert_equal("fifth task", t.soon[1..-1][1])
+    end
+
     # Setting #next when #now is empty should make #now the value of #next.
     def test_next_when_now_empty
         t = TaskContainer.new
