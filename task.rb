@@ -212,7 +212,7 @@ def status(tasks)
     lines += tasks.soon[1..-1].map  { |t| ["       - #{t}", COLORS[2]] }
 
     lines << ["later: - #{tasks.later[0]}", COLORS[3]]
-    lines += tasks.later[1..-1].map { |t| ["      - #{t}", COLORS[3]] }
+    lines += tasks.later[1..-1].map { |t| ["       - #{t}", COLORS[3]] }
 
     lines.each do |s, code|
         puts color(pad(s, 60), code)
