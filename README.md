@@ -36,6 +36,9 @@ task done bug ticket
 because the task contains the words `bug` and `ticket` - the order of keywords provided to `done` does not have to be the same
 as in the task wording. If there is any ambiguity `done` will instead print all matching tasks so that you can select one.
 
+`bump` works in the same way as `done`, but instead marks that task as the highest priority. Other tasks will be shifted down
+as if you had used `now`.
+
 ### Storing task list
 
 `task` stores your tasks in a YAML file located in the path indicated by environment variable `TASKDIR`.
