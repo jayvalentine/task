@@ -2,8 +2,6 @@
 
 require 'yaml'
 
-require_relative 'plain_formatter'
-
 # Provides a view over a slice of an array.
 class ArrayView
     def initialize(array, start_index)
@@ -221,19 +219,30 @@ def usage
 end
 
 def status(tasks)
-    puts PlainFormatter.new(tasks).result()
+    puts FORMATTER.new(tasks).result()
 end
 
 if $0 == __FILE__
+    require_relative 'plain_formatter'
+    require_relative 'color_block_formatter'
+
     # Should have at least one argument.
     if ARGV.size < 1
         usage()
         exit 1
     end
 
+    FORMATTERS = {
+        "plain" => PlainFormatter,
+        "color" => ColorBlockFormatter
+    }
+    
     COMMAND = ARGV[0]
     TASKDIR = ENV["TASKDIR"] || abort("TASKDIR is not set")
     TASKFILE = File.join(TASKDIR, "tasks.yaml")
+    TASKCONFIG = YAML::load(File.read(File.join(TASKDIR, "taskconfig.yaml")))
+
+    FORMATTER = FORMATTERS[TASKCONFIG["formatter"]]
 
     # Load current tasks from YAML file if it exists.
     tasks = if File.exist?(TASKFILE)
