@@ -2,6 +2,8 @@
 
 require 'yaml'
 
+require_relative 'plain_formatter'
+
 # Provides a view over a slice of an array.
 class ArrayView
     def initialize(array, start_index)
@@ -218,43 +220,8 @@ def usage
     puts ""
 end
 
-COLORS = [
-    167, # now
-    131, # next
-    95,  # soon
-    59   # later
-]
-
-def color(s, code)
-    "\033[48;5;#{code}m\033[38;5;252m#{s}\033[0m"
-end
-
-def pad(s, width)
-    padding = width - s.size
-    s += (" " * padding) if padding > 0
-    s
-end
-
 def status(tasks)
-    lines = []
-    lines << ["now:   - #{tasks.now}", COLORS[0]]
-    lines << ["next:  - #{tasks.next}", COLORS[1]]
-
-    lines << ["soon:  - #{tasks.soon[0]}", COLORS[2]]
-    unless tasks.soon.empty?
-        lines += tasks.soon[1..-1].map  { |t| ["       - #{t}", COLORS[2]] }
-    end
-
-    lines << ["later: - #{tasks.later[0]}", COLORS[3]]
-    unless tasks.later.empty?
-        lines += tasks.later[1..-1].map { |t| ["       - #{t}", COLORS[3]] }
-    end
-
-    lines.each do |s, code|
-        puts color(pad(s, 60), code)
-    end
-
-    puts ""
+    puts PlainFormatter.new(tasks).result()
 end
 
 if $0 == __FILE__
